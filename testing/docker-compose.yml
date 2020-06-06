@@ -3,7 +3,7 @@ services:
   redis:
     volumes:
       - ./redis/redis.conf:/etc/redis.conf
-      - /data/redis:/data
+      - ${DATA_PATH:-/data}/redis:/data
     ports:
       - "6379:6379"
     image: redis:5.0.5-alpine
@@ -13,11 +13,11 @@ services:
   mysql:
     image: mysql:5.7.27
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     volumes:
-      - /data/mysql:/var/lib/mysql
+      - ${DATA_PATH:-/data}/mysql:/var/lib/mysql
       - ./mysql/initdb:/docker-entrypoint-initdb.d
   nginx:
     volumes:
@@ -30,5 +30,17 @@ services:
     ports:
       - "80:80"
     environment:
-      - TZ=Asia/Shanghai
+      - TZ=${TIMEZONE}
     image: "nginx:1.17.2-alpine"
+  rabbitmq:
+    image: rabbitmq:3.7.26-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ${DATA_PATH:-/data}/rabbitmq/data:/var/lib/rabbitmq/mnesia
+      - ${DATA_PATH:-/data}/rabbitmq/logs:/var/log/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - TZ=${TIMEZONE}
